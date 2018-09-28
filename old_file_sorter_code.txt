@@ -1,0 +1,236 @@
+Листинг файла Form.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+using System.Text.RegularExpressions;
+using FileSorterLibrary;
+
+
+namespace _Kurs_PO_74_Fomenkov
+{
+    public partial class Form : System.Windows.Forms.Form
+    {
+        public Form()
+        {
+            InitializeComponent();
+            _FolderDirectory.Text = @"C:\_ExampleForKurs";
+        }
+
+        private void OutListBefore(FileInfo[] dir_file) 
+        {
+            foreach (FileInfo fileNames in dir_file)
+            {
+                _ListBeforeSort.Items.Add(fileNames);
+            }
+        } 
+        private void OutListAfter(FileInfo dir_file) 
+        {           
+                _ListAfterSort.Items.Add(dir_file);            
+        }
+
+        private void _Browse_Click(object sender, EventArgs e) 
+        {
+            _FolderDirectory.Text = "";
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.ShowDialog();
+            _FolderDirectory.Text = folderBrowserDialog.SelectedPath;
+
+        }
+
+        private void _StartSort_Click(object sender, EventArgs e) 
+        {
+            DirectoryInfo dir = new DirectoryInfo(_FolderDirectory.Text);
+            FileInfo[] dir_file = dir.GetFiles();
+            List<FileInfo> dir_file_sort;
+            string[] files = new string[dir_file.Length];
+
+            if (_DateRbtn.Checked) 
+            {
+                dir_file_sort = null;
+                _ListBeforeSort.Items.Clear();
+                _ListAfterSort.Items.Clear();
+                OutListBefore(dir_file);
+
+                dir_file_sort = (FileSorter.GetFilesAndSortThemByDate(_FolderDirectory.Text));
+
+                for (int i = 0; i < dir_file_sort.Count; i++)
+                {
+                    OutListAfter(dir_file_sort[i]);
+                    File.Move(dir_file_sort[i].FullName, dir_file_sort[i].DirectoryName + "\\" + "(" + i + ")" + dir_file_sort[i].Name);
+                    
+                }
+               
+            }
+
+            if (_ExpansionRbtn.Checked) 
+            {
+                dir_file_sort = null;
+                _ListBeforeSort.Items.Clear();
+                _ListAfterSort.Items.Clear();
+                OutListBefore(dir_file);
+                dir_file_sort = (FileSorter.GetFilesAndSortThemByExpansion(_FolderDirectory.Text));
+                for (int i = 0; i < dir_file_sort.Count; i++)
+                {
+                    OutListAfter(dir_file_sort[i]);
+                    File.Move(dir_file_sort[i].FullName, dir_file_sort[i].DirectoryName + "\\" + "(" + i + ")" + dir_file_sort[i].Name);
+
+                }
+
+            }
+
+            if (_SizeRbtn.Checked) 
+            {
+                dir_file_sort = null;
+                _ListBeforeSort.Items.Clear();
+                _ListAfterSort.Items.Clear();
+                OutListBefore(dir_file);
+                dir_file_sort = (FileSorter.GetFilesAndSortThemBySize(_FolderDirectory.Text));
+                for (int i = 0; i < dir_file_sort.Count; i++)
+                {
+                    OutListAfter(dir_file_sort[i]);
+                    File.Move(dir_file_sort[i].FullName, dir_file_sort[i].DirectoryName + "\\" + "(" + i + ")" + dir_file_sort[i].Name);
+
+                }
+
+            }
+
+        }
+
+        private void _DateRbtn_CheckedChanged(object sender, EventArgs e
+        {
+            _ListAfterSort.Items.Clear();
+            _ListBeforeSort.Items.Clear();
+        }
+
+        private void _ExpansionRbtn_CheckedChanged(object sender, EventArgs e) 
+        {
+            _ListAfterSort.Items.Clear();
+            _ListBeforeSort.Items.Clear();
+        }
+
+        private void _SizeRbtn_CheckedChanged(object sender, EventArgs e
+        {
+            _ListAfterSort.Items.Clear();
+            _ListBeforeSort.Items.Clear();
+        }
+    }
+}
+
+Листинг файла FileSorter.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Text.RegularExpressions;
+
+
+namespace FileSorterLibrary 
+{
+    class ComparerDate : IComparer<FileSystemInfo> 
+    {
+        public int Compare(FileSystemInfo file1, FileSystemInfo file2)
+        {
+            if (file1.CreationTime > file1.CreationTime)
+            {
+                return 1;
+            }
+            else if (file1.CreationTime < file2.CreationTime)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+    }
+
+    class ComparerExpansion : IComparer<FileInfo> 
+    {
+        public int Compare(FileInfo file1, FileInfo file2)
+        {
+            char[] f1 = file1.Extension.ToCharArray();
+            char[] f2 = file2.Extension.ToCharArray();
+
+            if (f1[1] > f2[1])
+            {
+                return 1;
+            }
+            else if (f1[1] < f2[1])
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+    }
+
+    class ComparerSize : IComparer<FileInfo> 
+    {
+        public int Compare(FileInfo file1, FileInfo file2)
+        {
+
+            if (file1.Length > file1.Length)
+            {
+                return 1;
+            }
+            else if (file1.Length < file2.Length)
+            {
+                return -1;
+            }
+
+            return 0;
+        }
+    }
+
+
+
+    public class FileSorter
+    {
+
+        public static List<FileInfo> GetFilesAndSortThemByDate(string files) 
+        {                                                                    
+            DirectoryInfo dir = new DirectoryInfo(files);
+            List<FileInfo> files_ = new List<FileInfo>();
+            files_.AddRange(dir.GetFiles());
+            ComparerDate comparerDate = new ComparerDate();
+            files_.Sort(comparerDate);
+
+            return files_;
+        }
+
+        public static List<FileInfo> GetFilesAndSortThemByExpansion(string files) 
+        {                                                                         
+            DirectoryInfo dir = new DirectoryInfo(files);
+            List<FileInfo> files_ = new List<FileInfo>();
+            files_.AddRange(dir.GetFiles());
+            ComparerExpansion comparerExpansion = new ComparerExpansion();
+            files_.Sort(comparerExpansion);
+
+            return files_;
+        }
+
+        public static List<FileInfo> GetFilesAndSortThemBySize(string files) 
+        {                                                                    
+            DirectoryInfo dir = new DirectoryInfo(files);
+            List<FileInfo> files_ = new List<FileInfo>();
+            files_.AddRange(dir.GetFiles());
+            ComparerSize comparerSize = new ComparerSize();
+            files_.Sort(comparerSize);
+
+            return files_;
+        }
+
+
+    }
+}
