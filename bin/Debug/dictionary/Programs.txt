@@ -1,0 +1,7 @@
+﻿Блокнот|Notepad.exe
+Нотепад|C:\\Program Files\\Notepad++\\notepad++.exe
+Стим|C:\\Program Files (x86)\\Steam\\Steam.exe
+Телеграм|C:\\Users\\Stepan\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe
+Браузер|C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe
+Визуал Студио|"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\Common7\\IDE\\devenv.exe
+Проводник|C:\\Windows\\explorer.exe
